@@ -1,0 +1,24 @@
+[versions]
+dataBindind = "7.4.2"
+coreKtx = "1.7.0"
+appCompat = "1.6.1"
+androidMaterial = "1.8.0"
+contraintLayout = "2.1.4"
+junit = "4.13.2"
+testExt = "1.1.5"
+testEspresso = "3.5.1"
+
+[libraries]
+databinding = { module = "com.android.databinding:viewbinding", version.ref = "dataBindind"}
+core-ktx = {module = "androidx.core:core-ktx", version.ref = "coreKtx"}
+appcompat = {module = "androidx.appcompat:appcompat", version.ref = "appCompat"}
+android-material = {module = "com.google.android.material:material", version.ref = "androidMaterial"}
+constraint-layout = {module = "androidx.constraintlayout:constraintlayout", version.ref = "contraintLayout"}
+junit = {module = "junit:junit", version.ref = "junit"}
+test-ext = {module = "androidx.test.ext:junit", version.ref = "testExt"}
+test-espresso = {module = "androidx.test.espresso:espresso-core", version.ref = "testEspresso"}
+
+[bundles]
+
+[plugins]
+
