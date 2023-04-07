@@ -7,6 +7,7 @@ contraintLayout = "2.1.4"
 junit = "4.13.2"
 testExt = "1.1.5"
 testEspresso = "3.5.1"
+daggerHilt = "2.44"
 
 [libraries]
 databinding = { module = "com.android.databinding:viewbinding", version.ref = "dataBindind"}
@@ -17,6 +18,9 @@ constraint-layout = {module = "androidx.constraintlayout:constraintlayout", vers
 junit = {module = "junit:junit", version.ref = "junit"}
 test-ext = {module = "androidx.test.ext:junit", version.ref = "testExt"}
 test-espresso = {module = "androidx.test.espresso:espresso-core", version.ref = "testEspresso"}
+hilt-android = {module = "com.google.dagger:hilt-android", version.ref = "daggerHilt"}
+hilt-compiler = {module = "com.google.dagger:hilt-compiler", version.ref = "daggerHilt"}
+
 
 [bundles]
 

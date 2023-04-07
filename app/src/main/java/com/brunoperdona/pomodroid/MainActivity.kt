@@ -15,10 +15,8 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setBackgroundDrawable(
             AppCompatResources.getDrawable(applicationContext, R.color.strong_pink))
         supportActionBar?.elevation = 10f
-
         binding = ActivityMainBinding.inflate(layoutInflater)
 
-        //binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
 }
