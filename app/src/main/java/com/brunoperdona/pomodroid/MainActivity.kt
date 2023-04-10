@@ -13,14 +13,22 @@ import android.os.IBinder
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.brunoperdona.pomodroid.databinding.ActivityMainBinding
 import com.brunoperdona.pomodroid.service.PomodoroService
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    private var isBound = false
     private lateinit var binding: ActivityMainBinding
     private lateinit var pomodoroService: PomodoroService
 
@@ -29,10 +37,12 @@ class MainActivity : AppCompatActivity() {
             val binder = service as PomodoroService.PomodoroBinder
             pomodoroService = binder.getService()
             Log.d("Service", "Service created")
+            isBound = true
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             Log.d("Service", "Service desconnected")
+            isBound = false
         }
     }
 
@@ -60,7 +70,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
+        lifecycleScope.launch {
+            while (!isBound){
+                delay(10)
+            }
+            repeatOnLifecycle(Lifecycle.State.CREATED){
+                pomodoroService.timer.collect{
+                    binding.time.text = it.getFormatedTime()
+                }
+            }
+        }
 
         setContentView(binding.root)
     }

@@ -47,6 +47,8 @@ dependencies {
     implementation libs.hilt.android
     kapt libs.hilt.compiler
 
+    implementation libs.bundles.lifecycle
+
     testImplementation libs.junit
     androidTestImplementation libs.test.ext
     androidTestImplementation libs.test.espresso
