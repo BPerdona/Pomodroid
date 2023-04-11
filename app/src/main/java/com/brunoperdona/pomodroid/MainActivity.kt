@@ -1,7 +1,6 @@
 package com.brunoperdona.pomodroid
 
 import android.Manifest
-import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -12,19 +11,20 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.brunoperdona.pomodroid.databinding.ActivityMainBinding
 import com.brunoperdona.pomodroid.service.PomodoroService
+import com.brunoperdona.pomodroid.service.PomodoroStatus
+import com.brunoperdona.pomodroid.util.Constants.POMODORO_STATE_EXTRA
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
@@ -64,19 +64,44 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.elevation = 10f
         binding = ActivityMainBinding.inflate(layoutInflater)
 
-        binding.startButton.setOnClickListener {
-            Intent(applicationContext, PomodoroService::class.java).apply {
-                applicationContext.startService(this)
-            }
-        }
-
         lifecycleScope.launch {
             while (!isBound){
                 delay(10)
             }
             repeatOnLifecycle(Lifecycle.State.CREATED){
-                pomodoroService.timer.collect{
+                pomodoroService.currentTime.collect{
                     binding.time.text = it.getFormatedTime()
+                }
+            }
+        }
+
+        lifecycleScope.launch{
+            while (!isBound){
+                delay(10)
+            }
+            repeatOnLifecycle(Lifecycle.State.CREATED){
+                pomodoroService.serviceStatus.collect{
+                    when(it){
+                        PomodoroStatus.Started -> {
+                            binding.startButton.text = "Stop"
+                            binding.startButton.setOnClickListener {
+                                Intent(applicationContext, PomodoroService::class.java).apply {
+                                    putExtra(POMODORO_STATE_EXTRA, PomodoroStatus.Stopped.name)
+                                    applicationContext.startService(this)
+                                }
+                            }
+                        }
+                        PomodoroStatus.Stopped -> {
+                            binding.startButton.text = "Start"
+                            binding.startButton.setOnClickListener {
+                                Intent(applicationContext, PomodoroService::class.java).apply {
+                                    putExtra(POMODORO_STATE_EXTRA, PomodoroStatus.Started.name)
+                                    applicationContext.startService(this)
+                                }
+                            }
+                        }
+                        else -> {}
+                    }
                 }
             }
         }

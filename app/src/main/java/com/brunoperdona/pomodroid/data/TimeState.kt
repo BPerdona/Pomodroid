@@ -1,16 +1,16 @@
-package com.brunoperdona.pomodroid.util
+package com.brunoperdona.pomodroid.data
 
 data class TimeState(
     val seconds: String,
     val minutes: String,
-    val hours: String? = null
+    val hours: String
 ){
     fun getFormatedTime(): String{
-        return if (hours != null){
-            "${hours.padStart(2,'0')}:" +
+        return if (hours.isBlank() || hours == "0" || hours == "00"){
             "${minutes.padStart(2,'0')}:" +
             seconds.padStart(2,'0')
         } else{
+            "${hours.padStart(2,'0')}:" +
             "${minutes.padStart(2,'0')}:" +
             seconds.padStart(2,'0')
         }
