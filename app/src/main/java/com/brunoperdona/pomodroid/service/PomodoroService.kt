@@ -67,7 +67,7 @@ class PomodoroService: Service() {
     }
 
     private fun startPomodoro(){
-        serviceStatus.value = PomodoroStatus.Started
+        serviceStatus.postValue(PomodoroStatus.Started)
         timer = fixedRateTimer(initialDelay = 0L, period = 1000L){
             if(duration.isNegative()){
                 stopPomodoro()
@@ -106,7 +106,7 @@ class PomodoroService: Service() {
         if(this::timer.isInitialized){
             timer.cancel()
         }
-        serviceStatus.value = PomodoroStatus.Stopped
+        serviceStatus.postValue(PomodoroStatus.Stopped)
     }
 
     private fun createNotificationChannel(){
