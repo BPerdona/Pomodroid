@@ -9,9 +9,11 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.MutableLiveData
 import com.brunoperdona.pomodroid.util.Constants
 import com.brunoperdona.pomodroid.data.TimeState
 import com.brunoperdona.pomodroid.util.Constants.NOTIFICATION_ID
+import com.brunoperdona.pomodroid.util.Constants.POMODORO_STATE_EXTRA
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,19 +41,16 @@ class PomodoroService: Service() {
     private var duration: Duration = Duration.ZERO
     private lateinit var timer: Timer
 
-    private val job = SupervisorJob()
-    private val coroutine = CoroutineScope(Dispatchers.IO+job)
-
-    private var _serviceStatus = MutableStateFlow(PomodoroStatus.Idle)
-    val serviceStatus = _serviceStatus.asStateFlow()
+    var serviceStatus = MutableLiveData(PomodoroStatus.Idle)
+        private set
 
     private var _currentTime = MutableStateFlow(TimeState("00", "03", ""))
     val currentTime = _currentTime.asStateFlow()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when(intent?.getStringExtra(Constants.POMODORO_STATE_EXTRA)){
+        when(intent?.getStringExtra(POMODORO_STATE_EXTRA)){
             PomodoroStatus.Started.name -> {
-                duration = Duration.parse("30m")
+                duration = Duration.parse("10s")
                 startForegroundService()
                 startPomodoro()
             }
@@ -68,10 +67,12 @@ class PomodoroService: Service() {
     }
 
     private fun startPomodoro(){
-        _serviceStatus.update {
-            PomodoroStatus.Started
-        }
-        timer = fixedRateTimer(initialDelay = 1000L, period = 1000L){
+        serviceStatus.value = PomodoroStatus.Started
+        timer = fixedRateTimer(initialDelay = 0L, period = 1000L){
+            if(duration.isNegative()){
+                stopPomodoro()
+                Log.d(SERVICE_TAG, "Timer stop. Hits 00")
+            }
             duration = duration.minus(1.seconds)
             updateTime()
             updateNotification()
@@ -79,16 +80,16 @@ class PomodoroService: Service() {
     }
 
     private fun updateTime(){
-        duration.toComponents{ _, m, s, h ->
-            Log.d(SERVICE_TAG, "Time count: $h:$m:$s")
-            _currentTime.update {
-                it.copy(
-                    seconds = s.toString(),
-                    minutes = m.toString(),
-                    hours = h.toString()
-                )
+        if (!duration.isNegative())
+            duration.toComponents{ _, m, s, h ->
+                _currentTime.update {
+                    it.copy(
+                        seconds = s.toString(),
+                        minutes = m.toString(),
+                        hours = h.toString()
+                    )
+                }
             }
-        }
     }
 
     private fun updateNotification(){
@@ -105,16 +106,14 @@ class PomodoroService: Service() {
         if(this::timer.isInitialized){
             timer.cancel()
         }
-        _serviceStatus.update {
-            PomodoroStatus.Stopped
-        }
+        serviceStatus.value = PomodoroStatus.Stopped
     }
 
     private fun createNotificationChannel(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 Constants.NOTIFICATION_CHANNEL_ID,
-                "TestName",
+                Constants.NOTIFICATION_NAME,
                 NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(channel)
@@ -123,7 +122,6 @@ class PomodoroService: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        job.cancel()
     }
 
     inner class PomodoroBinder: Binder(){

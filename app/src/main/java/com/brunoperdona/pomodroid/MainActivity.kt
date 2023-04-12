@@ -79,33 +79,29 @@ class MainActivity : AppCompatActivity() {
             while (!isBound){
                 delay(10)
             }
-            repeatOnLifecycle(Lifecycle.State.CREATED){
-                pomodoroService.serviceStatus.collect{
-                    when(it){
-                        PomodoroStatus.Started -> {
-                            binding.startButton.text = "Stop"
-                            binding.startButton.setOnClickListener {
-                                Intent(applicationContext, PomodoroService::class.java).apply {
-                                    putExtra(POMODORO_STATE_EXTRA, PomodoroStatus.Stopped.name)
-                                    applicationContext.startService(this)
-                                }
+            pomodoroService.serviceStatus.observe(this@MainActivity){
+                when(it) {
+                    PomodoroStatus.Started -> {
+                        binding.startButton.text = "Stop"
+                        binding.startButton.setOnClickListener {
+                            Intent(applicationContext, PomodoroService::class.java).apply {
+                                putExtra(POMODORO_STATE_EXTRA, PomodoroStatus.Stopped.name)
+                                applicationContext.startService(this)
                             }
                         }
-                        PomodoroStatus.Stopped -> {
-                            binding.startButton.text = "Start"
-                            binding.startButton.setOnClickListener {
-                                Intent(applicationContext, PomodoroService::class.java).apply {
-                                    putExtra(POMODORO_STATE_EXTRA, PomodoroStatus.Started.name)
-                                    applicationContext.startService(this)
-                                }
+                    }
+                    else -> {
+                        binding.startButton.text = "Start"
+                        binding.startButton.setOnClickListener {
+                            Intent(applicationContext, PomodoroService::class.java).apply {
+                                putExtra(POMODORO_STATE_EXTRA, PomodoroStatus.Started.name)
+                                applicationContext.startService(this)
                             }
                         }
-                        else -> {}
                     }
                 }
             }
         }
-
         setContentView(binding.root)
     }
 
