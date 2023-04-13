@@ -78,19 +78,27 @@ class MainActivity : AppCompatActivity() {
                 delay(10)
             }
             pomodoroService.serviceStatus.observe(this@MainActivity){
-                Log.d("Activity", "Collected $it")
                 when(it) {
                     PomodoroStatus.Started -> {
                         binding.startButton.text = getString(R.string.stop)
                         binding.startButton.setOnClickListener {
                             Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Pause.name)
+                                putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Stop.name)
                                 applicationContext.startService(this)
                             }
                         }
                     }
-                    else -> {
+                    PomodoroStatus.Idle -> {
                         binding.startButton.text = getString(R.string.start)
+                        binding.startButton.setOnClickListener {
+                            Intent(applicationContext, PomodoroService::class.java).apply {
+                                putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Start.name)
+                                applicationContext.startService(this)
+                            }
+                        }
+                    }
+                    PomodoroStatus.Stopped -> {
+                        binding.startButton.text = getString(R.string.proceed)
                         binding.startButton.setOnClickListener {
                             Intent(applicationContext, PomodoroService::class.java).apply {
                                 putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Start.name)

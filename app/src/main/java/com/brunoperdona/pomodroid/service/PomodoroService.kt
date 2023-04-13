@@ -40,20 +40,20 @@ class PomodoroService: Service() {
     var serviceStatus = MutableLiveData(PomodoroStatus.Idle)
         private set
 
-    private var _currentTime = MutableStateFlow(TimeState("", "", ""))
+    private var _currentTime = MutableStateFlow(TimeState("", "45", ""))
     val currentTime = _currentTime.asStateFlow()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(SERVICE_TAG, "Receive a intent: ${intent?.getStringExtra(POMODORO_STATE_EXTRA)}")
+        Log.d(SERVICE_TAG, "Receive a Intent: ${intent?.getStringExtra(POMODORO_STATE_EXTRA)}")
         when(intent?.getStringExtra(POMODORO_STATE_EXTRA)){
             IntentType.Start.name -> {
                 startForegroundService()
                 startPomodoro()
-                setStartNotification()
-            }
-            IntentType.Pause.name ->{
-                stopPomodoro()
                 setPauseNotification()
+            }
+            IntentType.Stop.name ->{
+                setStartNotification()
+                stopPomodoro()
             }
             IntentType.Cancel.name ->{
                 stopPomodoro()
@@ -74,7 +74,7 @@ class PomodoroService: Service() {
 
     private fun startPomodoro(){
         serviceStatus.postValue(PomodoroStatus.Started)
-        timer = fixedRateTimer(initialDelay = 0L, period = 1000L){
+        timer = fixedRateTimer(initialDelay = 1000L, period = 1000L){
             if(duration.isNegative()){
                 stopPomodoro()
                 Log.d(SERVICE_TAG, "Timer stop. Hits 00")
@@ -108,28 +108,28 @@ class PomodoroService: Service() {
     }
 
     @SuppressLint("RestrictedApi")
-    private fun setPauseNotification(){
-        notificationBuilder.mActions.removeAt(0)
-        notificationBuilder.mActions.add(
-            0,
-            NotificationCompat.Action(
-                0,
-                this.getString(R.string.start),
-                PomodoroHelper.pausePendingIntent(this)
-            )
-        )
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-    }
-
-    @SuppressLint("RestrictedApi")
     private fun setStartNotification(){
         notificationBuilder.mActions.removeAt(0)
         notificationBuilder.mActions.add(
             0,
             NotificationCompat.Action(
                 0,
+                this.getString(R.string.proceed),
+                PomodoroHelper.startPendingIntent(this)
+            )
+        )
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun setPauseNotification(){
+        notificationBuilder.mActions.removeAt(0)
+        notificationBuilder.mActions.add(
+            0,
+            NotificationCompat.Action(
+                0,
                 this.getString(R.string.stop),
-                PomodoroHelper.pausePendingIntent(this)
+                PomodoroHelper.stopPendingIntent(this)
             )
         )
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
@@ -168,16 +168,16 @@ class PomodoroService: Service() {
     }
 
     companion object{
-        private const val SERVICE_TAG = "PomodoroService"
+        private const val SERVICE_TAG = "Pomodoro Service"
 
         const val POMODORO_STATE_EXTRA = "POMODORO_INTENT_EXTRA"
 
         enum class IntentType{
-            Start, Pause, Cancel, ChangeTime
+            Start, Stop, Cancel, ChangeTime
         }
     }
 }
 
 enum class PomodoroStatus{
-    Idle, Started, Stopped, Canceled
+    Idle, Started, Stopped
 }

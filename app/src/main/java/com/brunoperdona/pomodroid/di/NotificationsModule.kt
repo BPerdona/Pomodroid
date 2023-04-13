@@ -25,8 +25,9 @@ object NotificationsModule {
             .setContentText(context.getString(R.string.start_time))
             .setSmallIcon(R.drawable.android_icon)
             .setOngoing(true)
-            .addAction(0, context.getString(R.string.stop), PomodoroHelper.pausePendingIntent(context))
+            .addAction(0, context.getString(R.string.stop), PomodoroHelper.stopPendingIntent(context))
             .addAction(0,context.getString(R.string.cancel), PomodoroHelper.cancelPendingIntent(context))
+            .setContentIntent(PomodoroHelper.clickPendingIntent(context))
     }
 
     @ServiceScoped
