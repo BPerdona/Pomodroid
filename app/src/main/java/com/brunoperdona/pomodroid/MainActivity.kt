@@ -11,20 +11,18 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.brunoperdona.pomodroid.databinding.ActivityMainBinding
 import com.brunoperdona.pomodroid.service.PomodoroService
+import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_STATE_EXTRA
 import com.brunoperdona.pomodroid.service.PomodoroStatus
-import com.brunoperdona.pomodroid.util.Constants.POMODORO_STATE_EXTRA
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
@@ -80,21 +78,22 @@ class MainActivity : AppCompatActivity() {
                 delay(10)
             }
             pomodoroService.serviceStatus.observe(this@MainActivity){
+                Log.d("Activity", "Collected $it")
                 when(it) {
                     PomodoroStatus.Started -> {
-                        binding.startButton.text = "Stop"
+                        binding.startButton.text = getString(R.string.stop)
                         binding.startButton.setOnClickListener {
                             Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_STATE_EXTRA, PomodoroStatus.Stopped.name)
+                                putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Pause.name)
                                 applicationContext.startService(this)
                             }
                         }
                     }
                     else -> {
-                        binding.startButton.text = "Start"
+                        binding.startButton.text = getString(R.string.start)
                         binding.startButton.setOnClickListener {
                             Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_STATE_EXTRA, PomodoroStatus.Started.name)
+                                putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Start.name)
                                 applicationContext.startService(this)
                             }
                         }

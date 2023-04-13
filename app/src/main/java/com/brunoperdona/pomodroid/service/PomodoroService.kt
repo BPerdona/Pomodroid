@@ -1,35 +1,30 @@
 package com.brunoperdona.pomodroid.service
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
+import com.brunoperdona.pomodroid.R
 import com.brunoperdona.pomodroid.util.Constants
 import com.brunoperdona.pomodroid.data.TimeState
 import com.brunoperdona.pomodroid.util.Constants.NOTIFICATION_ID
-import com.brunoperdona.pomodroid.util.Constants.POMODORO_STATE_EXTRA
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import java.util.*
 import javax.inject.Inject
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-@RequiresApi(Build.VERSION_CODES.O)
 @AndroidEntryPoint
 class PomodoroService: Service() {
 
-    private val SERVICE_TAG = "PomodoroService"
     @Inject
     lateinit var notificationManager: NotificationManager
 
@@ -38,24 +33,35 @@ class PomodoroService: Service() {
 
     override fun onBind(intent: Intent?) = PomodoroBinder()
 
-    private var duration: Duration = Duration.ZERO
+    private val defautDuration = "30m"
+    private var duration: Duration = Duration.parse(defautDuration)
     private lateinit var timer: Timer
 
     var serviceStatus = MutableLiveData(PomodoroStatus.Idle)
         private set
 
-    private var _currentTime = MutableStateFlow(TimeState("00", "03", ""))
+    private var _currentTime = MutableStateFlow(TimeState("", "", ""))
     val currentTime = _currentTime.asStateFlow()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(SERVICE_TAG, "Receive a intent: ${intent?.getStringExtra(POMODORO_STATE_EXTRA)}")
         when(intent?.getStringExtra(POMODORO_STATE_EXTRA)){
-            PomodoroStatus.Started.name -> {
-                duration = Duration.parse("10s")
+            IntentType.Start.name -> {
                 startForegroundService()
                 startPomodoro()
+                setStartNotification()
             }
-            PomodoroStatus.Stopped.name ->{
+            IntentType.Pause.name ->{
                 stopPomodoro()
+                setPauseNotification()
+            }
+            IntentType.Cancel.name ->{
+                stopPomodoro()
+                cancelPomodoro()
+                stopForegroundService()
+            }
+            IntentType.ChangeTime.name ->{
+
             }
         }
         return super.onStartCommand(intent, flags, startId)
@@ -101,6 +107,45 @@ class PomodoroService: Service() {
         )
     }
 
+    @SuppressLint("RestrictedApi")
+    private fun setPauseNotification(){
+        notificationBuilder.mActions.removeAt(0)
+        notificationBuilder.mActions.add(
+            0,
+            NotificationCompat.Action(
+                0,
+                this.getString(R.string.start),
+                PomodoroHelper.pausePendingIntent(this)
+            )
+        )
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun setStartNotification(){
+        notificationBuilder.mActions.removeAt(0)
+        notificationBuilder.mActions.add(
+            0,
+            NotificationCompat.Action(
+                0,
+                this.getString(R.string.stop),
+                PomodoroHelper.pausePendingIntent(this)
+            )
+        )
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    private fun cancelPomodoro(){
+        duration = Duration.parse(defautDuration)
+        serviceStatus.postValue(PomodoroStatus.Idle)
+        updateTime()
+    }
+
+    private fun stopForegroundService(){
+        notificationManager.cancel(NOTIFICATION_ID)
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
 
     private fun stopPomodoro(){
         if(this::timer.isInitialized){
@@ -110,18 +155,12 @@ class PomodoroService: Service() {
     }
 
     private fun createNotificationChannel(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                Constants.NOTIFICATION_CHANNEL_ID,
-                Constants.NOTIFICATION_NAME,
-                NotificationManager.IMPORTANCE_LOW
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
+        val channel = NotificationChannel(
+            Constants.NOTIFICATION_CHANNEL_ID,
+            Constants.NOTIFICATION_NAME,
+            NotificationManager.IMPORTANCE_LOW
+        )
+        notificationManager.createNotificationChannel(channel)
     }
 
     inner class PomodoroBinder: Binder(){
@@ -129,9 +168,13 @@ class PomodoroService: Service() {
     }
 
     companion object{
-        const val ACTION_SERVICE_START = "ACTION_SERVICE_START"
-        const val ACTION_SERVICE_STOP = "ACTION_SERVICE_STOP"
-        const val ACTION_SERVICE_CANCEL = "ACTION_SERVICE_CANCEL"
+        private const val SERVICE_TAG = "PomodoroService"
+
+        const val POMODORO_STATE_EXTRA = "POMODORO_INTENT_EXTRA"
+
+        enum class IntentType{
+            Start, Pause, Cancel, ChangeTime
+        }
     }
 }
 
