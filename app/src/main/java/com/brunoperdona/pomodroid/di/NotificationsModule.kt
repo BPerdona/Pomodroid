@@ -15,26 +15,29 @@ import dagger.hilt.android.scopes.ServiceScoped
 
 @Module
 @InstallIn(ServiceComponent::class)
-object NotificationsModule {
+object NotificationModule {
 
     @ServiceScoped
     @Provides
-    fun provideNotificationBuilder(@ApplicationContext context: Context): NotificationCompat.Builder{
+    fun provideNotificationBuilder(
+        @ApplicationContext context: Context
+    ): NotificationCompat.Builder {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(context.getString(R.string.app_name))
             .setContentText(context.getString(R.string.start_time))
             .setSmallIcon(R.drawable.android_icon)
             .setOngoing(true)
             .addAction(0, context.getString(R.string.stop), PomodoroHelper.stopPendingIntent(context))
-            .addAction(0,context.getString(R.string.cancel), PomodoroHelper.cancelPendingIntent(context))
+            .addAction(0, context.getString(R.string.cancel), PomodoroHelper.cancelPendingIntent(context))
             .setContentIntent(PomodoroHelper.clickPendingIntent(context))
     }
 
     @ServiceScoped
     @Provides
-    fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager{
+    fun provideNotificationManager(
+        @ApplicationContext context: Context
+    ): NotificationManager {
         return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
-
 
 }

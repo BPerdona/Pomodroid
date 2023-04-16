@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.brunoperdona.pomodroid.databinding.ActivityMainBinding
+import com.brunoperdona.pomodroid.service.PomodoroHelper
 import com.brunoperdona.pomodroid.service.PomodoroService
 import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_INTENT_EXTRA
 import com.brunoperdona.pomodroid.service.PomodoroStatus
@@ -73,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launch{
+        lifecycleScope.launch {
             while (!isBound){
                 delay(10)
             }
@@ -82,28 +83,28 @@ class MainActivity : AppCompatActivity() {
                     PomodoroStatus.Started -> {
                         binding.startButton.text = getString(R.string.stop)
                         binding.startButton.setOnClickListener {
-                            Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Stop.name)
-                                applicationContext.startService(this)
-                            }
+                            PomodoroHelper.triggerForegroundService(
+                                this@MainActivity,
+                                PomodoroService.Companion.IntentType.Stop.name
+                            )
                         }
                     }
                     PomodoroStatus.Idle -> {
                         binding.startButton.text = getString(R.string.start)
                         binding.startButton.setOnClickListener {
-                            Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Start.name)
-                                applicationContext.startService(this)
-                            }
+                            PomodoroHelper.triggerForegroundService(
+                                this@MainActivity,
+                                PomodoroService.Companion.IntentType.Start.name
+                            )
                         }
                     }
                     PomodoroStatus.Stopped -> {
                         binding.startButton.text = getString(R.string.resume)
                         binding.startButton.setOnClickListener {
-                            Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Start.name)
-                                applicationContext.startService(this)
-                            }
+                            PomodoroHelper.triggerForegroundService(
+                                this@MainActivity,
+                                PomodoroService.Companion.IntentType.Start.name
+                            )
                         }
                     }
                     null -> {}
