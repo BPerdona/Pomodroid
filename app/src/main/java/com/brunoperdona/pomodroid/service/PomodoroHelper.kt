@@ -3,9 +3,8 @@ package com.brunoperdona.pomodroid.service
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
+import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_INTENT_EXTRA
 import com.brunoperdona.pomodroid.MainActivity
-import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_STATE_EXTRA
 
 object PomodoroHelper {
 
@@ -20,7 +19,7 @@ object PomodoroHelper {
 
     fun startPendingIntent(context: Context): PendingIntent{
         val startIntent = Intent(context, PomodoroService::class.java).apply {
-            putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Start.name)
+            putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Start.name)
         }
         return PendingIntent.getService(
             context, 0, startIntent, flag
@@ -29,7 +28,7 @@ object PomodoroHelper {
 
     fun stopPendingIntent(context: Context): PendingIntent{
         val stopIntent = Intent(context, PomodoroService::class.java).apply {
-            putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Stop.name)
+            putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Stop.name)
         }
         return PendingIntent.getService(
             context, 0, stopIntent, flag
@@ -38,7 +37,7 @@ object PomodoroHelper {
 
     fun cancelPendingIntent(context: Context): PendingIntent{
         val cancelIntent = Intent(context, PomodoroService::class.java).apply {
-            putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Cancel.name)
+            putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Cancel.name)
         }
         return PendingIntent.getService(
             context, 0, cancelIntent, flag

@@ -17,7 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.brunoperdona.pomodroid.databinding.ActivityMainBinding
 import com.brunoperdona.pomodroid.service.PomodoroService
-import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_STATE_EXTRA
+import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_INTENT_EXTRA
 import com.brunoperdona.pomodroid.service.PomodoroStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                         binding.startButton.text = getString(R.string.stop)
                         binding.startButton.setOnClickListener {
                             Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Stop.name)
+                                putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Stop.name)
                                 applicationContext.startService(this)
                             }
                         }
@@ -92,20 +92,21 @@ class MainActivity : AppCompatActivity() {
                         binding.startButton.text = getString(R.string.start)
                         binding.startButton.setOnClickListener {
                             Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Start.name)
+                                putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Start.name)
                                 applicationContext.startService(this)
                             }
                         }
                     }
                     PomodoroStatus.Stopped -> {
-                        binding.startButton.text = getString(R.string.proceed)
+                        binding.startButton.text = getString(R.string.resume)
                         binding.startButton.setOnClickListener {
                             Intent(applicationContext, PomodoroService::class.java).apply {
-                                putExtra(POMODORO_STATE_EXTRA, PomodoroService.Companion.IntentType.Start.name)
+                                putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.Start.name)
                                 applicationContext.startService(this)
                             }
                         }
                     }
+                    null -> {}
                 }
             }
         }
