@@ -173,6 +173,7 @@ class PomodoroService: Service() {
         private const val SERVICE_TAG = "Pomodoro Service"
 
         const val POMODORO_INTENT_EXTRA = "POMODORO_INTENT_EXTRA"
+        const val POMODORO_INTENT_TIME_VALUE = "POMODORO_INTENT_TIME_VALUE"
 
         enum class IntentType{
             Start, Stop, Cancel, ChangeTime()

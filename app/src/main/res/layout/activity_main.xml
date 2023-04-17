@@ -2,48 +2,64 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/strong_pink"
+    android:background="@color/green_700"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <Button
         android:id="@+id/startButton"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
         android:backgroundTint="@color/white"
         android:padding="20dp"
         android:text="@string/start"
+        android:textAllCaps="false"
+        android:textColor="@color/green_700"
         android:textSize="26sp"
-        android:textColor="@color/pink"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cancelButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/cancelButton"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:padding="20dp"
+        android:text="@string/cancel"
+        android:textAllCaps="false"
+        android:textSize="26sp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/green_700"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView" />
+        app:layout_constraintStart_toEndOf="@id/startButton" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/pink"
+        app:cardBackgroundColor="@color/green_500"
         app:cardCornerRadius="14dp"
         app:contentPadding="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.30">
+        app:layout_constraintVertical_bias="0.40">
 
         <TextView
             android:id="@+id/time"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
             android:text="@string/start_time"
+            android:textAlignment="center"
             android:textColor="@color/white"
             android:textSize="70sp"
             android:textStyle="bold"
-            android:textAlignment="center"
-            android:paddingHorizontal="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

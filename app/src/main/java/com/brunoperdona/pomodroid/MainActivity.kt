@@ -59,9 +59,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         supportActionBar?.setBackgroundDrawable(
-            AppCompatResources.getDrawable(applicationContext, R.color.strong_pink))
+            AppCompatResources.getDrawable(applicationContext, R.color.green_600))
         supportActionBar?.elevation = 10f
         binding = ActivityMainBinding.inflate(layoutInflater)
+
+        binding.cancelButton.setOnClickListener {
+            PomodoroHelper.triggerForegroundService(
+                this@MainActivity,
+                PomodoroService.Companion.IntentType.Cancel.name
+            )
+        }
 
         lifecycleScope.launch {
             while (!isBound){
@@ -88,6 +95,8 @@ class MainActivity : AppCompatActivity() {
                                 PomodoroService.Companion.IntentType.Stop.name
                             )
                         }
+                        binding.cancelButton.setBackgroundColor(getColor(R.color.white))
+                        binding.cancelButton.isEnabled = true
                     }
                     PomodoroStatus.Idle -> {
                         binding.startButton.text = getString(R.string.start)
@@ -97,6 +106,8 @@ class MainActivity : AppCompatActivity() {
                                 PomodoroService.Companion.IntentType.Start.name
                             )
                         }
+                        binding.cancelButton.setBackgroundColor(getColor(R.color.green_900))
+                        binding.cancelButton.isEnabled = false
                     }
                     PomodoroStatus.Stopped -> {
                         binding.startButton.text = getString(R.string.resume)
@@ -106,6 +117,7 @@ class MainActivity : AppCompatActivity() {
                                 PomodoroService.Companion.IntentType.Start.name
                             )
                         }
+                        binding.cancelButton.isEnabled = true
                     }
                     null -> {}
                 }
