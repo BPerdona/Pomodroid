@@ -5,4 +5,7 @@
     <string name="stop">Stop</string>
     <string name="cancel">Cancel</string>
     <string name="resume">Resume</string>
+    <string name="pomodoro_chip">Pomodoro</string>
+    <string name="short_break_chip">Short Break</string>
+    <string name="long_break_chip">Long Break</string>
 </resources>

@@ -8,6 +8,7 @@ import com.brunoperdona.pomodroid.util.Constants.CANCEL_REQUEST_CODE
 import com.brunoperdona.pomodroid.util.Constants.RESUME_REQUEST_CODE
 import com.brunoperdona.pomodroid.util.Constants.STOP_REQUEST_CODE
 import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_INTENT_EXTRA
+import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_INTENT_TIME_VALUE
 
 object PomodoroHelper {
 
@@ -45,6 +46,14 @@ object PomodoroHelper {
         return PendingIntent.getService(
             context, CANCEL_REQUEST_CODE, cancelIntent, flag
         )
+    }
+
+    fun changePomodoroTime(context: Context, time: String){
+        Intent(context, PomodoroService::class.java).apply {
+            putExtra(POMODORO_INTENT_EXTRA, PomodoroService.Companion.IntentType.ChangeTime.name)
+            putExtra(POMODORO_INTENT_TIME_VALUE, time)
+            context.startService(this)
+        }
     }
 
     fun triggerForegroundService(context: Context, extra: String) {

@@ -70,6 +70,18 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
+        binding.pomodoroChip.setOnClickListener {
+            PomodoroHelper.changePomodoroTime(this, "25m")
+        }
+
+        binding.shortBreak.setOnClickListener {
+            PomodoroHelper.changePomodoroTime(this, "5m")
+        }
+
+        binding.longBreak.setOnClickListener {
+            PomodoroHelper.changePomodoroTime(this, "15m")
+        }
+
         lifecycleScope.launch {
             while (!isBound){
                 delay(10)

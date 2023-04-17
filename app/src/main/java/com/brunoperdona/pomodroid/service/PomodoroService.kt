@@ -33,14 +33,15 @@ class PomodoroService: Service() {
 
     override fun onBind(intent: Intent?) = PomodoroBinder()
 
-    private val defaultDuration = "30m"
+    private val defaultDuration = "25m"
     private var duration: Duration = Duration.parse(defaultDuration)
     private lateinit var timer: Timer
 
     var serviceStatus = MutableLiveData(PomodoroStatus.Idle)
         private set
 
-    private var _currentTime = MutableStateFlow(TimeState("", "45", ""))
+
+    private var _currentTime = MutableStateFlow(TimeState("", "25", ""))
     val currentTime = _currentTime.asStateFlow()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -65,7 +66,14 @@ class PomodoroService: Service() {
                 stopForegroundService()
             }
             IntentType.ChangeTime.name ->{
-
+                stopPomodoro()
+                cancelPomodoro()
+                stopForegroundService()
+                duration = Duration.parse(
+                    intent.getStringExtra(POMODORO_INTENT_TIME_VALUE
+                    ) ?: "25m"
+                )
+                updateTime()
             }
         }
         return super.onStartCommand(intent, flags, startId)

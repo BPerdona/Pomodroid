@@ -8,10 +8,12 @@
     tools:context=".MainActivity">
 
     <com.google.android.material.chip.ChipGroup
+        android:id="@+id/pomodoroChipGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:padding="8dp"
+        app:checkedChip="@id/pomodoroChip"
         app:layout_constraintBottom_toTopOf="@+id/cardView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,7 +23,7 @@
             android:id="@+id/pomodoroChip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pomodoro"
+            android:text="@string/pomodoro_chip"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             app:checkedIcon="@drawable/android_icon"
             app:chipCornerRadius="8dp"/>
@@ -30,7 +32,7 @@
             android:id="@+id/shortBreak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Short Break"
+            android:text="@string/short_break_chip"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             app:checkedIcon="@drawable/android_icon"
             app:chipCornerRadius="8dp"/>
@@ -39,7 +41,7 @@
             android:id="@+id/longBreak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Long Break"
+            android:text="@string/long_break_chip"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             app:checkedIcon="@drawable/android_icon"
             app:chipCornerRadius="8dp"/>
