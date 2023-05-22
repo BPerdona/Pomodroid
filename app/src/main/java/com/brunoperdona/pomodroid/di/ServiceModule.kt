@@ -2,6 +2,7 @@ package com.brunoperdona.pomodroid.di
 
 import android.app.NotificationManager
 import android.content.Context
+import android.media.MediaPlayer
 import androidx.core.app.NotificationCompat
 import com.brunoperdona.pomodroid.R
 import com.brunoperdona.pomodroid.service.PomodoroHelper
@@ -23,7 +24,7 @@ object NotificationModule {
         @ApplicationContext context: Context
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle(context.getString(R.string.app_name))
+            .setContentTitle(context.getString(R.string.pomodoro_chip))
             .setContentText(context.getString(R.string.start_time))
             .setSmallIcon(R.drawable.android_icon)
             .setOngoing(true)
@@ -38,6 +39,14 @@ object NotificationModule {
         @ApplicationContext context: Context
     ): NotificationManager {
         return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
+
+    @ServiceScoped
+    @Provides
+    fun provideMediaPlayer(
+        @ApplicationContext context: Context
+    ): MediaPlayer{
+        return MediaPlayer.create(context, R.raw.ringtone)
     }
 
 }

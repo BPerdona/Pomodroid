@@ -15,11 +15,10 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.brunoperdona.pomodroid.data.PomodoroStatus
 import com.brunoperdona.pomodroid.databinding.ActivityMainBinding
 import com.brunoperdona.pomodroid.service.PomodoroHelper
 import com.brunoperdona.pomodroid.service.PomodoroService
-import com.brunoperdona.pomodroid.service.PomodoroService.Companion.POMODORO_INTENT_EXTRA
-import com.brunoperdona.pomodroid.service.PomodoroStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -83,9 +82,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            while (!isBound){
-                delay(10)
-            }
+            awaitServiceBind()
             repeatOnLifecycle(Lifecycle.State.CREATED){
                 pomodoroService.currentTime.collect{
                     binding.time.text = it.getFormatedTime()
@@ -94,11 +91,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            while (!isBound){
-                delay(10)
-            }
-            pomodoroService.serviceStatus.observe(this@MainActivity){
-                when(it) {
+            awaitServiceBind()
+            pomodoroService.serviceState.observe(this@MainActivity){
+                when(it.pomodoroStatus) {
                     PomodoroStatus.Started -> {
                         binding.startButton.text = getString(R.string.stop)
                         binding.startButton.setOnClickListener {
@@ -131,7 +126,6 @@ class MainActivity : AppCompatActivity() {
                         }
                         binding.cancelButton.isEnabled = true
                     }
-                    null -> {}
                 }
             }
         }
@@ -147,6 +141,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
         requestPermissionLauncher.launch(permissions.asList().toTypedArray())
+    }
+
+    private suspend fun awaitServiceBind(){
+        while (!isBound){
+            delay(10)
+        }
     }
 
     override fun onStop() {

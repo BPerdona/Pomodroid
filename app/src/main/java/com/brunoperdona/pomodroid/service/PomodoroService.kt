@@ -5,11 +5,15 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Binder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
 import com.brunoperdona.pomodroid.R
+import com.brunoperdona.pomodroid.data.PomodoroState
+import com.brunoperdona.pomodroid.data.PomodoroStatus
+import com.brunoperdona.pomodroid.data.PomodoroType
 import com.brunoperdona.pomodroid.data.TimeState
 import com.brunoperdona.pomodroid.util.Constants.NOTIFICATION_CHANNEL_ID
 import com.brunoperdona.pomodroid.util.Constants.NOTIFICATION_ID
@@ -31,15 +35,16 @@ class PomodoroService: Service() {
     @Inject
     lateinit var notificationBuilder: NotificationCompat.Builder
 
+    @Inject
+    lateinit var mMediaPlayer: MediaPlayer
+
     override fun onBind(intent: Intent?) = PomodoroBinder()
 
-    private val defaultDuration = "25m"
-    private var duration: Duration = Duration.parse(defaultDuration)
+    private var duration: Duration = Duration.parse("25m")
     private lateinit var timer: Timer
 
-    var serviceStatus = MutableLiveData(PomodoroStatus.Idle)
+    var serviceState = MutableLiveData(PomodoroState())
         private set
-
 
     private var _currentTime = MutableStateFlow(TimeState("", "25", ""))
     val currentTime = _currentTime.asStateFlow()
@@ -48,10 +53,10 @@ class PomodoroService: Service() {
         Log.d(SERVICE_TAG, "Receive a Intent: ${intent?.getStringExtra(POMODORO_INTENT_EXTRA)}")
         when(intent?.getStringExtra(POMODORO_INTENT_EXTRA)){
             IntentType.Start.name -> {
-                if (serviceStatus.value != PomodoroStatus.Started){
+                if (serviceState.value?.pomodoroStatus != PomodoroStatus.Started){
                     startForegroundService()
                     setStopNotification()
-                    startPomodoro{ time ->
+                    startPomodoro { time ->
                         updateNotification(time)
                     }
                 }
@@ -69,10 +74,12 @@ class PomodoroService: Service() {
                 stopPomodoro()
                 cancelPomodoro()
                 stopForegroundService()
-                duration = Duration.parse(
-                    intent.getStringExtra(POMODORO_INTENT_TIME_VALUE
-                    ) ?: "25m"
-                )
+                val intentTime = intent.getStringExtra(POMODORO_INTENT_TIME_VALUE) ?: "25m"
+                duration = Duration.parse(intentTime)
+                updatePomodoroType(intentTime)
+                serviceState.postValue(serviceState.value?.copy(
+                    pomodoroStatus = PomodoroStatus.Idle
+                ))
                 updateTime()
             }
         }
@@ -80,12 +87,26 @@ class PomodoroService: Service() {
     }
 
     private fun startForegroundService(){
+        val pomodoroType = when(serviceState.value?.pomodoroType){
+            PomodoroType.Pomodoro -> getString(R.string.pomodoro_chip)
+            PomodoroType.Long -> getString(R.string.long_break_chip)
+            PomodoroType.Short -> getString(R.string.short_break_chip)
+            null -> getString(R.string.pomodoro_chip)
+        }
+        Log.e(SERVICE_TAG, "Start Foreground with $pomodoroType")
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, notificationBuilder.build())
+        startForeground(
+            NOTIFICATION_ID,
+            notificationBuilder
+                .setContentTitle(pomodoroType)
+                .build()
+        )
     }
 
     private fun startPomodoro(onTick: (text: String) -> Unit){
-        serviceStatus.postValue(PomodoroStatus.Started)
+        serviceState.postValue(
+            serviceState.value?.copy(pomodoroStatus = PomodoroStatus.Started)
+        )
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L){
             if(duration.isNegative()){
                 stopPomodoro()
@@ -108,6 +129,9 @@ class PomodoroService: Service() {
                     )
                 }
             }
+        else{
+            mMediaPlayer.start()
+        }
     }
 
     private fun updateNotification(time: String){
@@ -145,9 +169,37 @@ class PomodoroService: Service() {
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
+    private fun updatePomodoroType(time: String){
+        when(time){
+            "25m" -> {
+                serviceState.postValue(
+                    serviceState.value?.copy(pomodoroType = PomodoroType.Pomodoro)
+                )
+            }
+            "5m" -> {
+                serviceState.postValue(
+                    serviceState.value?.copy(pomodoroType = PomodoroType.Short)
+                )
+            }
+            "15m" -> {
+                serviceState.postValue(
+                    serviceState.value?.copy(pomodoroType = PomodoroType.Long)
+                )
+            }
+        }
+        notificationManager.notify(
+            NOTIFICATION_ID,
+            notificationBuilder
+                .setContentTitle(serviceState.value?.pomodoroType?.name ?: "Pomodoro")
+                .build()
+        )
+    }
+
     private fun cancelPomodoro(){
-        duration = Duration.parse(defaultDuration)
-        serviceStatus.postValue(PomodoroStatus.Idle)
+        duration = Duration.parse("25m")
+        serviceState.postValue(
+            serviceState.value?.copy(pomodoroStatus = PomodoroStatus.Idle)
+        )
         updateTime()
     }
 
@@ -161,7 +213,9 @@ class PomodoroService: Service() {
         if(this::timer.isInitialized){
             timer.cancel()
         }
-        serviceStatus.postValue(PomodoroStatus.Stopped)
+        serviceState.postValue(
+            serviceState.value?.copy(pomodoroStatus = PomodoroStatus.Stopped)
+        )
     }
 
     private fun createNotificationChannel(){
@@ -187,8 +241,4 @@ class PomodoroService: Service() {
             Start, Stop, Cancel, ChangeTime()
         }
     }
-}
-
-enum class PomodoroStatus{
-    Idle, Started, Stopped
 }
