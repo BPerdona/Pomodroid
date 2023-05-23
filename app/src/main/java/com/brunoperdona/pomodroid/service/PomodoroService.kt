@@ -1,6 +1,7 @@
 package com.brunoperdona.pomodroid.service
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -10,6 +11,7 @@ import android.os.Binder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
+import com.brunoperdona.pomodroid.MainActivity
 import com.brunoperdona.pomodroid.R
 import com.brunoperdona.pomodroid.data.PomodoroState
 import com.brunoperdona.pomodroid.data.PomodoroStatus
@@ -109,8 +111,10 @@ class PomodoroService: Service() {
         )
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L){
             if(duration.isNegative()){
-                stopPomodoro()
                 Log.d(SERVICE_TAG, "Timer stop. Hits 00")
+                stopPomodoro()
+                mMediaPlayer.start()
+                timeEndNotification()
             }
             duration = duration.minus(1.seconds)
             updateTime()
@@ -129,9 +133,6 @@ class PomodoroService: Service() {
                     )
                 }
             }
-        else{
-            mMediaPlayer.start()
-        }
     }
 
     private fun updateNotification(time: String){
@@ -139,6 +140,12 @@ class PomodoroService: Service() {
             NOTIFICATION_ID,
             notificationBuilder.setContentText(time).build()
         )
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun timeEndNotification(){
+        notificationBuilder.clearActions()
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
     @SuppressLint("RestrictedApi")
@@ -172,19 +179,13 @@ class PomodoroService: Service() {
     private fun updatePomodoroType(time: String){
         when(time){
             "25m" -> {
-                serviceState.postValue(
-                    serviceState.value?.copy(pomodoroType = PomodoroType.Pomodoro)
-                )
+                serviceState.value?.pomodoroType = PomodoroType.Pomodoro
             }
             "5m" -> {
-                serviceState.postValue(
-                    serviceState.value?.copy(pomodoroType = PomodoroType.Short)
-                )
+                serviceState.value?.pomodoroType = PomodoroType.Short
             }
             "15m" -> {
-                serviceState.postValue(
-                    serviceState.value?.copy(pomodoroType = PomodoroType.Long)
-                )
+                serviceState.value?.pomodoroType = PomodoroType.Long
             }
         }
         notificationManager.notify(
@@ -196,7 +197,13 @@ class PomodoroService: Service() {
     }
 
     private fun cancelPomodoro(){
-        duration = Duration.parse("25m")
+        val time = when(serviceState.value?.pomodoroType){
+            PomodoroType.Pomodoro -> "25m"
+            PomodoroType.Long -> "15m"
+            PomodoroType.Short -> "5m"
+            else-> "25m"
+        }
+        duration = Duration.parse(time)
         serviceState.postValue(
             serviceState.value?.copy(pomodoroStatus = PomodoroStatus.Idle)
         )
