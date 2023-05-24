@@ -25,27 +25,30 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pomodoro_chip"
-            style="@style/Widget.MaterialComponents.Chip.Choice"
             app:checkedIcon="@drawable/android_icon"
-            app:chipCornerRadius="8dp"/>
+            app:chipCornerRadius="8dp"
+            android:textSize="16sp"
+            style="@style/Widget.MaterialComponents.Chip.Choice" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/shortBreak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/short_break_chip"
-            style="@style/Widget.MaterialComponents.Chip.Choice"
             app:checkedIcon="@drawable/android_icon"
-            app:chipCornerRadius="8dp"/>
+            app:chipCornerRadius="8dp"
+            android:textSize="16sp"
+            style="@style/Widget.MaterialComponents.Chip.Choice" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/longBreak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/long_break_chip"
-            style="@style/Widget.MaterialComponents.Chip.Choice"
             app:checkedIcon="@drawable/android_icon"
-            app:chipCornerRadius="8dp"/>
+            app:chipCornerRadius="8dp"
+            android:textSize="16sp"
+            style="@style/Widget.MaterialComponents.Chip.Choice" />
 
     </com.google.android.material.chip.ChipGroup>
 
@@ -78,6 +81,22 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.40" />
     </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/alarmCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_alarm"
+        android:padding="20dp"
+        android:textSize="30sp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/green_700"
+        android:textAllCaps="false"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView" />
 
     <Button
         android:id="@+id/startButton"

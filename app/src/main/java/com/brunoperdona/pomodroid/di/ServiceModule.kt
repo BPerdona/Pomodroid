@@ -31,7 +31,6 @@ object NotificationModule {
             .addAction(0, context.getString(R.string.stop), PomodoroHelper.stopPendingIntent(context))
             .addAction(0, context.getString(R.string.cancel), PomodoroHelper.cancelPendingIntent(context))
             .setContentIntent(PomodoroHelper.clickPendingIntent(context))
-            .setVibrate(longArrayOf(1000,1000,1000,1000,1000))
     }
 
     @ServiceScoped
@@ -47,7 +46,9 @@ object NotificationModule {
     fun provideMediaPlayer(
         @ApplicationContext context: Context
     ): MediaPlayer{
-        return MediaPlayer.create(context, R.raw.ringtone)
+        val mediaPlayer = MediaPlayer.create(context, R.raw.mario_fall)
+        mediaPlayer.isLooping = true
+        return mediaPlayer
     }
 
 }

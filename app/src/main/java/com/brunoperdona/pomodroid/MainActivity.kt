@@ -10,15 +10,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.get
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.brunoperdona.pomodroid.data.PomodoroStatus
+import com.brunoperdona.pomodroid.data.PomodoroType
 import com.brunoperdona.pomodroid.databinding.ActivityMainBinding
 import com.brunoperdona.pomodroid.service.PomodoroHelper
 import com.brunoperdona.pomodroid.service.PomodoroService
+import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -67,6 +71,17 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity,
                 PomodoroService.Companion.IntentType.Cancel.name
             )
+        }
+
+        binding.alarmCancel.setOnClickListener {
+            PomodoroHelper.triggerForegroundService(
+                this@MainActivity,
+                PomodoroService.Companion.IntentType.StopAlarm.name
+            )
+            binding.alarmCancel.visibility = View.INVISIBLE
+            binding.startButton.visibility = View.VISIBLE
+            binding.cancelButton.visibility = View.VISIBLE
+            binding.pomodoroChipGroup.visibility = View.VISIBLE
         }
 
         binding.pomodoroChip.setOnClickListener {
@@ -125,6 +140,12 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
                         binding.cancelButton.isEnabled = true
+                    }
+                    PomodoroStatus.Alarm -> {
+                        binding.alarmCancel.visibility = View.VISIBLE
+                        binding.startButton.visibility = View.INVISIBLE
+                        binding.cancelButton.visibility = View.INVISIBLE
+                        binding.pomodoroChipGroup.visibility = View.INVISIBLE
                     }
                 }
             }

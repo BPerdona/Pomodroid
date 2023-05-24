@@ -84,8 +84,27 @@ class PomodoroService: Service() {
                 ))
                 updateTime()
             }
+            IntentType.StopAlarm.name -> {
+                stopAlarm()
+                updateNotificationActions()
+                stopForegroundService()
+            }
         }
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun stopAlarm(){
+        mMediaPlayer.pause()
+        mMediaPlayer.seekTo(0)
+        serviceState.postValue(serviceState.value?.copy(pomodoroStatus = PomodoroStatus.Idle))
+        val time = when(serviceState.value?.pomodoroType){
+            PomodoroType.Pomodoro -> "25m"
+            PomodoroType.Long -> "15m"
+            PomodoroType.Short -> "5m"
+            else -> "25m"
+        }
+        duration = Duration.parse(time)
+        updateTime()
     }
 
     private fun startForegroundService(){
@@ -115,6 +134,7 @@ class PomodoroService: Service() {
                 stopPomodoro()
                 mMediaPlayer.start()
                 timeEndNotification()
+                serviceState.postValue(serviceState.value?.copy(pomodoroStatus = PomodoroStatus.Alarm))
             }
             duration = duration.minus(1.seconds)
             updateTime()
@@ -140,6 +160,21 @@ class PomodoroService: Service() {
             NOTIFICATION_ID,
             notificationBuilder.setContentText(time).build()
         )
+    }
+
+    private fun updateNotificationActions(){
+        notificationBuilder.clearActions()
+        notificationBuilder.addAction(
+            0,
+            this.getString(R.string.stop),
+            PomodoroHelper.stopPendingIntent(this)
+        )
+        notificationBuilder.addAction(
+            0,
+            this.getString(R.string.cancel),
+            PomodoroHelper.cancelPendingIntent(this)
+        )
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
     @SuppressLint("RestrictedApi")
@@ -245,7 +280,7 @@ class PomodoroService: Service() {
         const val POMODORO_INTENT_TIME_VALUE = "POMODORO_INTENT_TIME_VALUE"
 
         enum class IntentType{
-            Start, Stop, Cancel, ChangeTime()
+            Start, Stop, Cancel, ChangeTime, StopAlarm
         }
     }
 }

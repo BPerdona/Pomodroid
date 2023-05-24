@@ -10,5 +10,5 @@ enum class PomodoroType{
 }
 
 enum class PomodoroStatus{
-    Idle, Started, Stopped
+    Idle, Started, Stopped, Alarm
 }
