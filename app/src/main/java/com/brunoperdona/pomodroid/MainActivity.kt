@@ -24,8 +24,7 @@ import com.brunoperdona.pomodroid.service.PomodoroHelper
 import com.brunoperdona.pomodroid.service.PomodoroService
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -119,6 +118,14 @@ class MainActivity : AppCompatActivity() {
                         }
                         binding.cancelButton.setBackgroundColor(getColor(R.color.white))
                         binding.cancelButton.isEnabled = true
+
+                        val currentChip = when(pomodoroService.serviceState.value?.pomodoroType){
+                            PomodoroType.Pomodoro -> binding.pomodoroChip.id
+                            PomodoroType.Long -> binding.longBreak.id
+                            PomodoroType.Short -> binding.shortBreak.id
+                            null -> binding.pomodoroChip.id
+                        }
+                        binding.pomodoroChipGroup.check(currentChip)
                     }
                     PomodoroStatus.Idle -> {
                         binding.startButton.text = getString(R.string.start)
@@ -164,15 +171,15 @@ class MainActivity : AppCompatActivity() {
         requestPermissionLauncher.launch(permissions.asList().toTypedArray())
     }
 
-    private suspend fun awaitServiceBind(){
-        while (!isBound){
-            delay(10)
-        }
-    }
-
     override fun onStop() {
         super.onStop()
         unbindService(connection)
         Log.d("Service", "OnStop unbind Service")
+    }
+
+    private suspend fun awaitServiceBind(){
+        while (!isBound){
+            delay(10)
+        }
     }
 }
