@@ -171,8 +171,8 @@ class MainActivity : AppCompatActivity() {
         requestPermissionLauncher.launch(permissions.asList().toTypedArray())
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onDestroy() {
+        super.onDestroy()
         unbindService(connection)
         Log.d("Service", "OnStop unbind Service")
     }
